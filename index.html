@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Parc PC UDAF 47</title>
+<style>
+:root {
+  --bg: #f5f6f8; --surface: #fff; --text: #1d2330; --muted: #667085; --border: #dde1e7;
+  --accent: #1f5fa8; --accent-text: #fff; --ok: #1e7d4f; --ok-bg: #e5f4ec; --ok-line: #3fa66f;
+  --warn: #9a5b00; --warn-bg: #fdf1dc; --danger: #b42318; --dirty: #fff8e1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12151b; --surface: #1b1f27; --text: #e6e8ec; --muted: #9aa3b2; --border: #2e3440;
+    --accent: #5b9be6; --accent-text: #0d1117; --ok: #5cc88f; --ok-bg: #173226; --ok-line: #3fa66f;
+    --warn: #f0b45a; --warn-bg: #3a2c12; --danger: #f2877d; --dirty: #2f2a17;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 16px; position: sticky; top: 0; z-index: 5; }
+.wrap { max-width: 1000px; margin: 0 auto; }
+.top { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+h1 { font-size: 20px; margin: 0; }
+.sub { color: var(--muted); font-size: 13px; }
+main { padding: 16px; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button { border: 1px solid var(--border); background: var(--surface); padding: 7px 12px; border-radius: 6px; cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); font-weight: 600; }
+button:disabled { opacity: .5; cursor: default; }
+.msg { padding: 10px 12px; border-radius: 6px; margin-top: 10px; display: none; font-weight: 600; }
+.msg.show { display: block; }
+.msg.ok { background: var(--ok-bg); color: var(--ok); }
+.msg.warn { background: var(--warn-bg); color: var(--warn); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.stat b { display: block; font-size: 22px; }
+.stat span { color: var(--muted); font-size: 13px; }
+.stat.done b { color: var(--ok); }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.filters input[type=search] { flex: 1 1 220px; }
+.filters input, .filters select { padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+
+.list { display: flex; flex-direction: column; gap: 6px; }
+details.pc { background: var(--surface); border: 1px solid var(--border); border-left: 5px solid var(--border); border-radius: 8px; }
+details.pc.done { background: var(--ok-bg); border-color: var(--ok-line); }
+details.pc.dirty { box-shadow: inset 0 0 0 2px var(--warn); }
+details.pc > summary { list-style: none; cursor: pointer; padding: 10px 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+details.pc > summary::-webkit-details-marker { display: none; }
+details.pc > summary::before { content: "▸"; color: var(--muted); width: 12px; transition: transform .15s; }
+details.pc[open] > summary::before { transform: rotate(90deg); }
+.pc-num { font-weight: 700; min-width: 120px; }
+.pc-info { color: var(--muted); font-size: 13px; flex: 1 1 260px; }
+.pc-who { font-size: 13px; }
+.pc-done { font-size: 13px; font-weight: 600; color: var(--ok); white-space: nowrap; }
+.pc-todo { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.pc-body { padding: 4px 12px 14px 34px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.field label, .field > span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+.field select, .field input[type=text], .field textarea { width: 100%; padding: 7px 9px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); }
+.field textarea { resize: vertical; min-height: 60px; }
+.field { min-width: 0; }
+.field.wide { grid-column: 1 / -1; }
+.check { display: flex; align-items: center; gap: 8px; padding: 7px 0; cursor: pointer; }
+.check input { width: 20px; height: 20px; }
+.check.big { font-weight: 600; }
+.ro select, .ro input, .ro textarea { pointer-events: none; }
+.empty { text-align: center; color: var(--muted); padding: 30px; background: var(--surface); border-radius: 8px; }
+
+dialog { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); max-width: 520px; width: calc(100% - 32px); }
+dialog label { display: block; margin: 10px 0 4px; font-weight: 600; font-size: 14px; }
+dialog input, dialog select { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
+dialog p { color: var(--muted); font-size: 13px; }
+body.locked header, body.locked main { display: none; }
+#lock { display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 16px; }
+body.locked #lock { display: flex; }
+#lock form { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; width: 100%; max-width: 360px; }
+#lock h1 { margin-bottom: 4px; }
+#lock input { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); margin: 14px 0 10px; }
+#lock button { width: 100%; padding: 9px; }
+#lock-err { color: var(--danger); font-size: 14px; min-height: 20px; margin-top: 8px; }
+.actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+@media (max-width: 600px) {
+  .pc-body { padding-left: 12px; }
+  .pc-num { min-width: 0; }
+}
+</style>
+</head>
+<body class="locked">
+<div id="lock">
+  <form id="lock-form">
+    <h1>Parc PC — UDAF 47</h1>
+    <div class="sub">Accès réservé au service informatique. La liste est chiffrée : sans le mot de passe, elle est illisible.</div>
+    <label for="lock-pw" class="sub" style="display:block;margin-top:14px">Mot de passe</label>
+    <input id="lock-pw" type="password" autocomplete="current-password" required style="margin-top:4px">
+    <button type="submit" class="primary" id="lock-btn">Accéder à la liste</button>
+    <div id="lock-err" role="alert"></div>
+  </form>
+</div>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Parc PC — UDAF 47</h1>
+        <div class="sub" id="sub">Chargement…</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="btn-lock" title="Verrouiller la page sur cet appareil">🔒 Verrouiller</button>
+        <button id="btn-reload" title="Recharger la dernière version enregistrée">↻ Actualiser</button>
+        <button id="btn-add">+ Ajouter un PC</button>
+        <button id="btn-settings">⚙ Connexion GitHub</button>
+        <button id="btn-save" class="primary" disabled>Enregistrer</button>
+      </div>
+    </div>
+    <div id="msg" class="msg" role="status"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="stats">
+    <div class="stat"><b id="s-total">0</b><span>PC</span></div>
+    <div class="stat done"><b id="s-done">0</b><span>mis à jour</span></div>
+    <div class="stat"><b id="s-w11">0</b><span>sous Windows 11</span></div>
+    <div class="stat"><b id="s-w10">0</b><span>encore sous Windows 10</span></div>
+    <div class="stat"><b id="s-bat">0</b><span>batterie changée</span></div>
+  </div>
+
+  <div class="filters">
+    <input type="search" id="f-q" placeholder="Rechercher (numéro, modèle, site, personne, commentaire)…">
+    <select id="f-done"><option value="">Tous les PC</option><option value="0">À faire</option><option value="1">Déjà mis à jour</option></select>
+    <select id="f-model"><option value="">Modèle : tous</option></select>
+    <select id="f-site"><option value="">Site : tous</option></select>
+    <select id="f-win"><option value="">Windows : tous</option><option value="10">Windows 10</option><option value="11">Windows 11</option></select>
+    <select id="f-bat"><option value="">Batterie : toutes</option><option value="1">Changée</option><option value="0">Non changée</option></select>
+  </div>
+
+  <div id="list" class="list"><div class="empty">Chargement…</div></div>
+</main>
+
+<dialog id="dlg-settings">
+  <form method="dialog">
+    <h2 style="margin-top:0">Connexion GitHub</h2>
+    <p>Sans jeton, la page est en lecture seule. Le jeton est enregistré uniquement dans ce navigateur. Utilisez un jeton « fine-grained » limité à ce seul dépôt, permission <b>Contents : Read and write</b>.</p>
+    <label for="cfg-owner">Propriétaire du dépôt</label><input id="cfg-owner" autocomplete="off">
+    <label for="cfg-repo">Dépôt</label><input id="cfg-repo" autocomplete="off">
+    <label for="cfg-branch">Branche</label><input id="cfg-branch" autocomplete="off">
+    <label for="cfg-token">Jeton GitHub</label><input id="cfg-token" type="password" autocomplete="off" placeholder="github_pat_…">
+    <div class="actions">
+      <button value="rekey" type="submit">Changer le mot de passe de la liste</button>
+      <button value="forget" type="submit">Oublier le jeton</button>
+      <button value="cancel" type="submit">Annuler</button>
+      <button value="save" type="submit" class="primary">Valider</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-add">
+  <form method="dialog">
+    <h2 style="margin-top:0">Ajouter un PC</h2>
+    <label for="add-num">Numéro du PC</label><input id="add-num" required autocomplete="off">
+    <label for="add-model">Modèle</label><select id="add-model"></select>
+    <label for="add-site">Site</label><select id="add-site"></select>
+    <div class="actions">
+      <button value="cancel" type="submit" formnovalidate>Annuler</button>
+      <button value="add" type="submit" class="primary">Ajouter</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+
+  var DATA_PATH = 'pcs.json';
+  // Le premier élément de chaque liste est la valeur par défaut.
+  var MODELES = ['Latitude 3410', 'Latitude 3420', 'Latitude 3520', 'Pro 16', 'PC fixe'];
+  var SITES = ['Agen', 'Yakari', 'Badd', 'Kirikou', 'Marmande', 'Trenque', 'Fumel', 'Montanou'];
+  // Modèles sans batterie : le champ « Batterie changée » est masqué.
+  var SANS_BATTERIE = ['PC fixe'];
+  // pcs.json est chiffré (AES-256-GCM, clé dérivée du mot de passe par
+  // PBKDF2-SHA256) : le dépôt et le site sont publics, seul ce chiffrement
+  // protège la liste. Même format que include/cli/modules/parc-pages.php.
+  var PBKDF2_ITER = 600000;
+  var LS = { key: 'parc.key', token: 'parc.token', owner: 'parc.owner', repo: 'parc.repo', branch: 'parc.branch' };
+
+  var state = { pcs: [], meta: {}, sha: null, dirty: new Set(), removed: new Set(), open: new Set(), crypt: null, oldCrypt: null, rekey: false };
+
+  function ls(k, v) {
+    try {
+      if (v === undefined) return localStorage.getItem(k) || '';
+      if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v);
+    } catch (e) { return ''; }
+  }
+
+  // owner.github.io/repo/ → owner + repo, modifiables dans la boîte de dialogue.
+  function cfg() {
+    var host = location.hostname, m = host.match(/^([^.]+)\.github\.io$/i);
+    var seg = location.pathname.split('/').filter(Boolean)[0] || '';
+    return {
+      owner: ls(LS.owner) || (m ? m[1] : ''),
+      repo: ls(LS.repo) || (m ? (seg && !/\.html?$/.test(seg) ? seg : host) : ''),
+      branch: ls(LS.branch) || 'main',
+      token: ls(LS.token)
+    };
+  }
+
+  function apiUrl(c) {
+    return 'https://api.github.com/repos/' + encodeURIComponent(c.owner) + '/' + encodeURIComponent(c.repo)
+      + '/contents/' + DATA_PATH;
+  }
+
+  function b64decode(s) {
+    var bin = atob(s.replace(/\s/g, '')), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function b64encode(str) {
+    var bytes = new TextEncoder().encode(str), bin = '';
+    for (var i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+  }
+
+  function toB64(bytes) {
+    var bin = '';
+    for (var i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+  }
+  function fromB64(s) {
+    var bin = atob(String(s).replace(/\s/g, '')), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
+  function isEnvelope(env) { return !!(env && env.v === 1 && env.salt && env.iv && env.data && env.iter); }
+
+  async function deriveRaw(password, saltB64, iter) {
+    var base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+    var bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: fromB64(saltB64), iterations: iter }, base, 256);
+    return new Uint8Array(bits);
+  }
+  async function makeCrypt(raw, salt, iter) {
+    var key = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt', 'decrypt']);
+    return { key: key, raw: toB64(raw), salt: salt, iter: iter };
+  }
+
+  // Clé connue qui ne correspond plus au fichier (mauvais mot de passe, ou
+  // liste rechiffrée ailleurs) : retour à l'écran de connexion.
+  function BadKey(m) { this.message = m; }
+
+  var NOT_ENCRYPTED = 'pcs.json n\'est pas chiffré : générez-le avec « php manage.php parc-pages export ».';
+
+  async function decryptEnv(env, crypt) {
+    if (!isEnvelope(env)) throw new Error(NOT_ENCRYPTED);
+    if (!crypt || env.salt !== crypt.salt || env.iter !== crypt.iter) throw new BadKey('Le mot de passe de la liste a changé.');
+    var plain;
+    try {
+      plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: fromB64(env.iv) }, crypt.key, fromB64(env.data));
+    } catch (e) { throw new BadKey('Mot de passe incorrect.'); }
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  async function encryptText(text, crypt) {
+    var iv = crypto.getRandomValues(new Uint8Array(12));
+    var ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, crypt.key, new TextEncoder().encode(text));
+    return JSON.stringify({ v: 1, kdf: 'PBKDF2-SHA256', iter: crypt.iter, salt: crypt.salt, iv: toB64(iv), data: toB64(new Uint8Array(ct)) }) + '\n';
+  }
+
+  // « Marie Dupont » → « Marie D. » ; « DUPONT Marie » → « Marie D. » ;
+  // « Jean-Luc De La Fontaine » → « Jean-Luc F. ».
+  // Le site GitHub Pages est public : jamais de nom de famille complet.
+  function shortName(name) {
+    var w = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (w.length < 2) return w.join('');
+    var isUpper = function (s) { return s.length > 1 && s === s.toUpperCase() && s !== s.toLowerCase(); };
+    if (isUpper(w[0]) && !isUpper(w[w.length - 1])) w.push(w.shift());
+    var last = w[w.length - 1];
+    return w[0] + ' ' + last.charAt(0).toUpperCase() + '.';
+  }
+
+  function normalize(p) {
+    return {
+      numero: String(p.numero || '').trim(),
+      modele: p.modele || MODELES[0],
+      site: p.site || SITES[0],
+      etat: p.etat || '',
+      windows: String(p.windows) === '11' ? '11' : '10',
+      batterie_changee: !!p.batterie_changee,
+      attribue_a: shortName(p.attribue_a),
+      mis_a_jour: !!p.mis_a_jour,
+      mis_a_jour_le: p.mis_a_jour_le || '',
+      commentaire: p.commentaire || '',
+      modifie_le: p.modifie_le || ''
+    };
+  }
+
+  function hasBattery(p) { return SANS_BATTERIE.indexOf(p.modele) < 0; }
+
+  function frDate(iso) {
+    var d = iso ? new Date(iso) : null;
+    return d && !isNaN(d) ? d.toLocaleDateString('fr-FR') : '';
+  }
+
+  function msg(text, kind) {
+    var el = document.getElementById('msg');
+    el.textContent = text || '';
+    el.className = 'msg' + (text ? ' show ' + (kind || 'ok') : '');
+  }
+
+  async function fetchRemote() {
+    var c = cfg();
+    if (c.token && c.owner && c.repo) {
+      var r = await fetch(apiUrl(c) + '?ref=' + encodeURIComponent(c.branch) + '&_=' + Date.now(), {
+        headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + c.token }
+      });
+      if (r.status === 404) throw new Error(DATA_PATH + ' introuvable dans le dépôt ' + c.owner + '/' + c.repo);
+      if (!r.ok) throw new Error('GitHub a répondu ' + r.status + (r.status === 401 ? ' (jeton invalide ou expiré)' : ''));
+      var j = await r.json();
+      return { env: JSON.parse(b64decode(j.content)), sha: j.sha };
+    }
+    var r2 = await fetch(DATA_PATH + '?_=' + Date.now(), { cache: 'no-store' });
+    if (!r2.ok) throw new Error('Impossible de lire ' + DATA_PATH + ' (' + r2.status + ')');
+    return { env: await r2.json(), sha: null };
+  }
+
+  async function load() {
+    try {
+      var res = await fetchRemote();
+      state.meta = (await decryptEnv(res.env, state.crypt)) || {};
+      state.pcs = (state.meta.pcs || []).map(normalize).filter(function (p) { return p.numero; });
+      state.sha = res.sha;
+      state.dirty.clear(); state.removed.clear();
+      render();
+      msg('');
+    } catch (e) {
+      if (e instanceof BadKey) { lock(e.message); return; }
+      msg(e.message, 'warn');
+      document.getElementById('list').innerHTML = '<div class="empty">Aucune donnée.</div>';
+    }
+    updateHeader();
+  }
+
+  function canEdit() { var c = cfg(); return !!(c.token && c.owner && c.repo); }
+
+  function updateHeader() {
+    var c = cfg(), parts = [];
+    parts.push(canEdit() ? 'Modification activée (' + c.owner + '/' + c.repo + ')' : 'Lecture seule — connectez-vous pour modifier');
+    if (state.meta.genere_le) parts.push('dernier export osTicket : ' + (state.meta.genere_le.length <= 10 ? frDate(state.meta.genere_le) : new Date(state.meta.genere_le).toLocaleString('fr-FR')));
+    document.getElementById('sub').textContent = parts.join(' · ');
+    var n = state.dirty.size + state.removed.size + (state.rekey ? 1 : 0), save = document.getElementById('btn-save');
+    save.disabled = n === 0;
+    save.textContent = n ? 'Enregistrer (' + n + ')' : 'Enregistrer';
+    if (n && !document.getElementById('msg').classList.contains('warn'))
+      msg(state.rekey ? 'Nouveau mot de passe pas encore enregistré : appuyez sur « Enregistrer ».'
+        : n + ' PC modifié(s), pas encore enregistré(s) : appuyez sur « Enregistrer ».', 'warn');
+  }
+
+  function el(tag, attrs, children) {
+    var e = document.createElement(tag);
+    for (var k in attrs || {}) {
+      if (k === 'text') e.textContent = attrs[k];
+      else if (k in e && k !== 'list') e[k] = attrs[k];
+      else e.setAttribute(k, attrs[k]);
+    }
+    (children || []).forEach(function (c) { if (c) e.appendChild(c); });
+    return e;
+  }
+
+  var ETATS = { stock: 'En stock', assigned: 'Attribué', reserved: 'Réservé', lost: 'Perdu', hs: 'Hors service' };
+
+  // Une valeur hors liste (modèle venant de l'inventaire osTicket, par
+  // exemple) est ajoutée en fin de liste pour ne pas être perdue.
+  function fillSelect(sel, values, current) {
+    var list = values.slice();
+    if (current && list.indexOf(current) < 0) list.push(current);
+    sel.textContent = '';
+    list.forEach(function (v) { sel.appendChild(el('option', { value: v, text: v })); });
+    sel.value = current || values[0];
+    return sel;
+  }
+
+  // Filtres Modèle / Site : listes de base + valeurs hors liste présentes.
+  function refreshFilters() {
+    [['f-model', MODELES, 'modele', 'Modèle : tous'], ['f-site', SITES, 'site', 'Site : tous']].forEach(function (f) {
+      var sel = document.getElementById(f[0]), cur = sel.value, vals = f[1].slice();
+      state.pcs.forEach(function (p) { if (vals.indexOf(p[f[2]]) < 0) vals.push(p[f[2]]); });
+      sel.textContent = '';
+      sel.appendChild(el('option', { value: '', text: f[3] }));
+      vals.forEach(function (v) { sel.appendChild(el('option', { value: v, text: v })); });
+      sel.value = vals.indexOf(cur) >= 0 ? cur : '';
+    });
+  }
+
+  function field(label, control, wide) {
+    return el('div', { className: 'field' + (wide ? ' wide' : '') }, [el('label', { text: label }), control]);
+  }
+
+  function checkbox(text, checked, ro, big) {
+    var cb = el('input', { type: 'checkbox', checked: checked, disabled: ro });
+    return { input: cb, node: el('label', { className: 'check' + (big ? ' big' : '') }, [cb, el('span', { text: text })]) };
+  }
+
+  // Un PC = une ligne repliée (résumé) ; un clic la déplie sur les champs
+  // modifiables. Les modifications ne redessinent que ce PC, pour ne pas
+  // perdre la saisie en cours ni replier la ligne.
+  function pcItem(p) {
+    var ro = !canEdit();
+    var d = el('details', { className: 'pc' + (ro ? ' ro' : '') });
+    d.open = state.open.has(p.numero);
+    d.addEventListener('toggle', function () { if (d.open) state.open.add(p.numero); else state.open.delete(p.numero); });
+
+    var info = el('span', { className: 'pc-info' }), who = el('span', { className: 'pc-who' }), status = el('span');
+    var sum = el('summary', {}, [el('span', { className: 'pc-num', text: p.numero }), info, who, status]);
+
+    function refresh() {
+      d.classList.toggle('done', p.mis_a_jour);
+      d.classList.toggle('dirty', state.dirty.has(p.numero));
+      var bits = [p.modele, p.site, 'Windows ' + p.windows];
+      if (hasBattery(p) && p.batterie_changee) bits.push('batterie changée');
+      if (p.etat && p.etat !== 'assigned') bits.push(ETATS[p.etat] || p.etat);
+      info.textContent = bits.join(' · ');
+      who.textContent = p.attribue_a ? '👤 ' + p.attribue_a : '';
+      status.className = p.mis_a_jour ? 'pc-done' : 'pc-todo';
+      status.textContent = p.mis_a_jour ? '✓ Mis à jour' + (p.mis_a_jour_le ? ' le ' + frDate(p.mis_a_jour_le) : '') : 'À faire';
+      batField.style.display = hasBattery(p) ? '' : 'none';
+    }
+    function changed() {
+      p.modifie_le = new Date().toISOString();
+      state.dirty.add(p.numero);
+      refresh(); renderStats(); updateHeader();
+    }
+
+    var mod = fillSelect(el('select', { disabled: ro }), MODELES, p.modele);
+    mod.onchange = function () { p.modele = mod.value; changed(); };
+    var site = fillSelect(el('select', { disabled: ro }), SITES, p.site);
+    site.onchange = function () { p.site = site.value; changed(); };
+    var win = fillSelect(el('select', { disabled: ro }), ['10', '11'], p.windows);
+    Array.prototype.forEach.call(win.options, function (o) { o.textContent = 'Windows ' + o.value; });
+    win.onchange = function () { p.windows = win.value; changed(); };
+
+    var bat = checkbox('Batterie changée', p.batterie_changee, ro);
+    bat.input.onchange = function () { p.batterie_changee = bat.input.checked; changed(); };
+    var batField = el('div', { className: 'field' }, [el('span', { text: 'Batterie' }), bat.node]);
+
+    var done = checkbox('PC mis à jour', p.mis_a_jour, ro, true);
+    done.input.onchange = function () {
+      p.mis_a_jour = done.input.checked;
+      p.mis_a_jour_le = p.mis_a_jour ? new Date().toISOString() : '';
+      changed();
+    };
+
+    var person = el('input', { type: 'text', value: p.attribue_a, readOnly: ro, placeholder: ro ? '—' : 'Prénom Nom' });
+    person.onchange = function () { person.value = shortName(person.value); p.attribue_a = person.value; changed(); };
+
+    var com = el('textarea', { value: p.commentaire, readOnly: ro, placeholder: ro ? '' : 'Commentaire… (site public : aucune donnée personnelle)' });
+    com.oninput = function () { p.commentaire = com.value; changed(); };
+
+    var body = el('div', { className: 'pc-body' }, [
+      el('div', { className: 'field' }, [el('span', { text: 'Avancement' }), done.node]),
+      field('Modèle', mod),
+      field('Site', site),
+      field('Windows', win),
+      batField,
+      field('Attribué à', person),
+      field('Commentaires', com, true)
+    ]);
+    d.appendChild(sum); d.appendChild(body);
+    refresh();
+    return d;
+  }
+
+  function filtered() {
+    var v = function (id) { return document.getElementById(id).value; };
+    var q = v('f-q').trim().toLowerCase(), w = v('f-win'), b = v('f-bat'), fm = v('f-model'), fs = v('f-site'), fd = v('f-done');
+    return state.pcs.filter(function (p) {
+      if (fd && String(+p.mis_a_jour) !== fd) return false;
+      if (w && p.windows !== w) return false;
+      if (b && (!hasBattery(p) || String(+p.batterie_changee) !== b)) return false;
+      if (fm && p.modele !== fm) return false;
+      if (fs && p.site !== fs) return false;
+      if (q && [p.numero, p.modele, p.site, p.attribue_a, p.commentaire].join(' ').toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    }).sort(function (a, b2) { return a.numero.localeCompare(b2.numero, 'fr', { numeric: true }); });
+  }
+
+  function renderStats() {
+    var all = state.pcs, n = function (f) { return all.filter(f).length; };
+    document.getElementById('s-total').textContent = all.length;
+    document.getElementById('s-done').textContent = n(function (p) { return p.mis_a_jour; });
+    document.getElementById('s-w11').textContent = n(function (p) { return p.windows === '11'; });
+    document.getElementById('s-w10').textContent = n(function (p) { return p.windows === '10'; });
+    document.getElementById('s-bat').textContent = n(function (p) { return hasBattery(p) && p.batterie_changee; });
+  }
+
+  function render() {
+    refreshFilters();
+    var box = document.getElementById('list'), list = filtered();
+    box.textContent = '';
+    if (!list.length) box.appendChild(el('div', { className: 'empty', text: state.pcs.length ? 'Aucun PC ne correspond aux filtres.' : 'Aucun PC dans la liste.' }));
+    list.forEach(function (p) { box.appendChild(pcItem(p)); });
+    renderStats();
+  }
+
+  function serialize(pcs) {
+    var out = Object.assign({}, state.meta, { pcs: pcs.map(function (p) { return Object.assign({}, p); }) });
+    out.pcs.sort(function (a, b) { return a.numero.localeCompare(b.numero, 'fr', { numeric: true }); });
+    return JSON.stringify(out, null, 2) + '\n';
+  }
+
+  // Si quelqu'un d'autre a enregistré entre-temps : on repart de sa version
+  // et on n'y réapplique que les PC modifiés/ajoutés/retirés ici.
+  function mergeInto(remotePcs) {
+    var byNum = {};
+    remotePcs.map(normalize).forEach(function (p) { byNum[p.numero] = p; });
+    state.pcs.forEach(function (p) { if (state.dirty.has(p.numero)) byNum[p.numero] = p; });
+    state.removed.forEach(function (n) { delete byNum[n]; });
+    return Object.keys(byNum).map(function (k) { return byNum[k]; });
+  }
+
+  async function save() {
+    var c = cfg();
+    if (!canEdit()) { openSettings(); return; }
+    var btn = document.getElementById('btn-save');
+    btn.disabled = true; btn.textContent = 'Enregistrement…';
+    var count = state.dirty.size + state.removed.size;
+    var message = state.rekey ? 'Parc PC : changement du mot de passe de la liste'
+      : 'Parc PC : ' + count + ' modification(s) depuis la page';
+    try {
+      for (var attempt = 0; attempt < 2; attempt++) {
+        var body = { message: message, content: b64encode(await encryptText(serialize(state.pcs), state.crypt)), branch: c.branch };
+        if (state.sha) body.sha = state.sha;
+        var r = await fetch(apiUrl(c), {
+          method: 'PUT',
+          headers: { 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + c.token, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (r.ok) {
+          var j = await r.json();
+          state.sha = j.content.sha;
+          state.dirty.clear(); state.removed.clear();
+          if (state.rekey) { state.rekey = false; state.oldCrypt = null; rememberKey(); }
+          msg('');
+          render();
+          msg('✓ Enregistré. Les autres appareils le verront après « Actualiser ».', 'ok');
+          return;
+        }
+        if ((r.status === 409 || r.status === 422) && attempt === 0) {
+          // Conflit : relu avec la clé en vigueur dans le dépôt (l'ancienne
+          // si un changement de mot de passe est en attente ici).
+          var remote = await fetchRemote();
+          var data = await decryptEnv(remote.env, state.rekey ? state.oldCrypt : state.crypt);
+          state.meta = data || {};
+          state.sha = remote.sha;
+          state.pcs = mergeInto(data.pcs || []);
+          continue;
+        }
+        throw new Error('GitHub a répondu ' + r.status + (r.status === 401 || r.status === 403
+          ? ' — le jeton est invalide ou n\'a pas la permission « Contents : Read and write »' : ''));
+      }
+    } catch (e) {
+      if (e instanceof BadKey) e.message = 'la liste a été rechiffrée avec un autre mot de passe depuis un autre appareil — rechargez la page';
+      msg('✗ NON ENREGISTRÉ : ' + e.message + '. Vos modifications sont toujours à l\'écran.', 'warn');
+    } finally {
+      updateHeader();
+    }
+  }
+
+  function openSettings() {
+    var c = cfg(), d = document.getElementById('dlg-settings');
+    document.getElementById('cfg-owner').value = c.owner;
+    document.getElementById('cfg-repo').value = c.repo;
+    document.getElementById('cfg-branch').value = c.branch;
+    document.getElementById('cfg-token').value = c.token;
+    d.showModal();
+  }
+
+  document.getElementById('dlg-settings').addEventListener('close', function () {
+    var v = this.returnValue;
+    if (v === 'save') {
+      ls(LS.owner, document.getElementById('cfg-owner').value.trim() || null);
+      ls(LS.repo, document.getElementById('cfg-repo').value.trim() || null);
+      ls(LS.branch, document.getElementById('cfg-branch').value.trim() || null);
+      ls(LS.token, document.getElementById('cfg-token').value.trim() || null);
+    } else if (v === 'forget') {
+      ls(LS.token, null);
+    } else if (v === 'rekey') {
+      changePassword();
+      return;
+    } else return;
+    if (state.dirty.size || state.removed.size) { render(); updateHeader(); } else load();
+  });
+
+  document.getElementById('dlg-add').addEventListener('close', function () {
+    if (this.returnValue !== 'add') return;
+    var num = document.getElementById('add-num').value.trim();
+    if (!num) return;
+    if (state.pcs.some(function (p) { return p.numero.toLowerCase() === num.toLowerCase(); })) { msg(num + ' est déjà dans la liste.', 'warn'); return; }
+    var p = normalize({ numero: num, modele: document.getElementById('add-model').value, site: document.getElementById('add-site').value });
+    p.modifie_le = new Date().toISOString();
+    state.pcs.push(p); state.removed.delete(num); state.dirty.add(num); state.open.add(num);
+    render(); updateHeader();
+  });
+
+  document.getElementById('btn-add').onclick = function () {
+    if (!canEdit()) { openSettings(); return; }
+    document.getElementById('add-num').value = '';
+    fillSelect(document.getElementById('add-model'), MODELES);
+    fillSelect(document.getElementById('add-site'), SITES);
+    document.getElementById('dlg-add').showModal();
+  };
+  document.getElementById('btn-reload').onclick = function () {
+    if ((state.dirty.size || state.removed.size) && !confirm('Des modifications ne sont pas enregistrées. Les abandonner et recharger ?')) return;
+    load();
+  };
+  document.getElementById('btn-settings').onclick = openSettings;
+  document.getElementById('btn-save').onclick = save;
+  ['f-q', 'f-done', 'f-model', 'f-site', 'f-win', 'f-bat'].forEach(function (id) { document.getElementById(id).addEventListener('input', render); });
+  window.addEventListener('beforeunload', function (e) {
+    if (state.dirty.size || state.removed.size) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  // La clé dérivée (pas le mot de passe) est mémorisée sur l'appareil ;
+  // « Verrouiller » l'efface. Si la liste est rechiffrée avec un autre mot
+  // de passe, la clé ne correspond plus et le mot de passe est redemandé.
+  function rememberKey() {
+    ls(LS.key, JSON.stringify({ raw: state.crypt.raw, salt: state.crypt.salt, iter: state.crypt.iter }));
+  }
+
+  function lock(reason) {
+    ls(LS.key, null);
+    state.crypt = null; state.oldCrypt = null; state.rekey = false;
+    state.pcs = []; state.meta = {}; state.dirty.clear(); state.removed.clear();
+    document.getElementById('list').textContent = '';
+    document.body.classList.add('locked');
+    document.getElementById('lock-err').textContent = reason || '';
+    document.getElementById('lock-pw').focus();
+  }
+
+  document.getElementById('lock-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var pw = document.getElementById('lock-pw'), err = document.getElementById('lock-err'), btn = document.getElementById('lock-btn');
+    btn.disabled = true; btn.textContent = 'Déchiffrement…'; err.textContent = '';
+    try {
+      var res = await fetchRemote();
+      if (!isEnvelope(res.env)) throw new Error(NOT_ENCRYPTED);
+      var crypt = await makeCrypt(await deriveRaw(pw.value, res.env.salt, res.env.iter), res.env.salt, res.env.iter);
+      await decryptEnv(res.env, crypt);
+      state.crypt = crypt;
+      rememberKey();
+      pw.value = '';
+      document.body.classList.remove('locked');
+      await load();
+    } catch (ex) {
+      err.textContent = ex.message;
+      pw.select();
+    } finally {
+      btn.disabled = false; btn.textContent = 'Accéder à la liste';
+    }
+  });
+
+  document.getElementById('btn-lock').onclick = function () {
+    if ((state.dirty.size || state.removed.size || state.rekey) && !confirm('Des modifications ne sont pas enregistrées. Verrouiller quand même ?')) return;
+    lock('');
+  };
+
+  // Nouveau sel → nouvelle clé : après l'enregistrement, tous les autres
+  // appareils devront saisir le nouveau mot de passe.
+  async function changePassword() {
+    if (!canEdit()) { msg('Un jeton GitHub est nécessaire pour changer le mot de passe.', 'warn'); return; }
+    var p1 = prompt('Nouveau mot de passe de la liste (12 caractères minimum) :');
+    if (p1 === null) return;
+    if (p1.length < 12) { msg('Mot de passe trop court (12 caractères minimum). Rien n\'a été changé.', 'warn'); return; }
+    if (prompt('Confirmez le nouveau mot de passe :') !== p1) { msg('Les deux saisies diffèrent. Rien n\'a été changé.', 'warn'); return; }
+    var salt = toB64(crypto.getRandomValues(new Uint8Array(16)));
+    if (!state.rekey) state.oldCrypt = state.crypt;
+    state.crypt = await makeCrypt(await deriveRaw(p1, salt, PBKDF2_ITER), salt, PBKDF2_ITER);
+    state.rekey = true;
+    msg('');
+    updateHeader();
+  }
+
+  (async function start() {
+    try {
+      var k = JSON.parse(ls(LS.key) || 'null');
+      if (k && k.raw && k.salt && k.iter) {
+        state.crypt = await makeCrypt(fromB64(k.raw), k.salt, k.iter);
+        document.body.classList.remove('locked');
+        await load();
+        return;
+      }
+    } catch (e) { /* clé illisible : on redemande le mot de passe */ }
+    lock('');
+  })();
+})();
+</script>
+</body>
+</html>
