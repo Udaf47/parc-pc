@@ -5,6 +5,7 @@ contenu d'un **dépôt GitHub dédié** (ex. `Udaf47/parc-pc`), publié avec
 GitHub Pages. Après saisie du mot de passe, la page liste tous les PC à
 la suite ; un clic sur un PC déplie ses champs :
 
+
 - **PC mis à jour** (case à cocher, datée) : les PC déjà faits apparaissent **en vert**,
 - le modèle (liste : Latitude 3410 par défaut, Latitude 3420, Latitude 3520, Pro 16, PC fixe),
 - le site (liste : Agen par défaut, Yakari, Badd, Kirikou, Marmande, Trenque, Fumel, Montanou),
